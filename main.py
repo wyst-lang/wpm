@@ -1,10 +1,13 @@
 import urllib
+import urllib.parse
 import requests
 import os
+from json import dump
 import shutil
 import zipfile
 from sys import argv
 from urllib.parse import urlparse
+import re
 
 def extract(zip_file, pkgName):
     os.makedirs("tmp", exist_ok=True)
@@ -25,9 +28,7 @@ def downloadRelease(pkgName, repo, tag):
         headers={"Accept": "application/vnd.github+json"}).json()['tag_name']
     url = os.path.join(repo, f'archive/refs/tags/{tag}.zip')
     urllib.request.urlretrieve(url, "temp.zip")
-    input_zip_path = 'temp.zip'
-    new_folder_name = pkgName
-    extract(input_zip_path, new_folder_name)
+    extract('temp.zip', pkgName)
     os.remove('temp.zip')
 
 def installPackage(packageName, packageVersion='latest'):
@@ -42,6 +43,14 @@ def installPackage(packageName, packageVersion='latest'):
         print(f'Error ({packageName}): {data["message"]}')
         quit(1)
 
+def verify_repo(n) -> str:
+    re_match = re.match(r'^https://(github.com)/[a-zA-Z0-9\-]+/[a-zA-Z0-9\-]+', n)
+    if re_match:
+        return str(re_match.group())
+    else:
+        print(f'Error: invalid repo')
+        quit(1)
+
 if __name__=="__main__":
     argl = len(argv)
     if argl > 1:
@@ -54,4 +63,13 @@ if __name__=="__main__":
                             installPackage(package[0], package[1])
                         else:
                             installPackage(pkg)
+            case "init":
+                pkg_json = {
+                    'name': str(os.getcwd().split('/')[-1].split('\\')[-1]),
+                    'repo': verify_repo(input("link to the repository (required) "))
+                }
+                if not os.path.exists:
+                    os.mkdir("lib")
+                with open('package.json', 'w')as f:
+                    dump(pkg_json, f)
             case _:...
