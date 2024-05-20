@@ -1,28 +1,25 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"net/http"
 )
 
 func showPackageInfo(packageName string) {
-	url := fmt.Sprintf("https://raw.githubusercontent.com/wyst-lang/index/master/%s/index.json", packageName)
-	resp, err := http.Get(url)
+	repoURL, err := getRepoURL(packageName)
 	if err != nil {
-		fmt.Printf("Error fetching package info: %v\n", err)
-		return
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		fmt.Printf("Error: %s\n", resp.Status)
+		fmt.Printf("Error getting repo URL: %v\n", err)
 		return
 	}
 
-	var pkgIndex PackageIndex
-	if err := json.NewDecoder(resp.Body).Decode(&pkgIndex); err != nil {
-		fmt.Printf("Error decoding package info: %v\n", err)
+	indexURL, err := findIndexURL(repoURL)
+	if err != nil {
+		fmt.Printf("Error finding index URL: %v\n", err)
+		return
+	}
+
+	pkgIndex, err := fetchPackageIndex(indexURL)
+	if err != nil {
+		fmt.Printf("Error fetching package index: %v\n", err)
 		return
 	}
 
