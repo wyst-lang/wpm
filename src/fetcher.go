@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
 )
 
 type Request struct {
@@ -27,33 +26,33 @@ type PackageIndex struct {
 	Message string `json:"message"`
 }
 
-func sendRequest(method, url string, jsonBody []byte) Request {
+func sendRequest(method, url string, jsonBody []byte) (Request, error) {
 	bodyReader := bytes.NewReader(jsonBody)
 	req, err := http.NewRequest(method, url, bodyReader)
 	if err != nil {
-		fmt.Printf("Error fetching package info: %v\n", err)
-		return Request{Body: []byte(""), StatusCode: 402}
+		return Request{Body: []byte(""), StatusCode: 400}, err
 	}
 	req.Header.Set("Content-Type", "application/json")
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		fmt.Printf("client: error making http request: %s\n", err)
-		os.Exit(1)
+		return Request{Body: []byte(""), StatusCode: 400}, err
 	}
 	defer res.Body.Close()
 	resBody, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		fmt.Printf("client: could not read response body: %s\n", err)
-		os.Exit(1)
+		return Request{Body: []byte(""), StatusCode: 400}, err
 	}
-	return Request{Body: resBody, StatusCode: res.StatusCode}
+	return Request{Body: resBody, StatusCode: res.StatusCode}, nil
 }
 
 func getPackage(packageName string) (PackageIndex, error) {
 	var pkgidx PackageIndex
 	jsonBody := []byte(fmt.Sprintf(`{"name": "%s"}`, packageName))
-	req := sendRequest(http.MethodGet, "http://localhost:3000", jsonBody)
-	err := json.Unmarshal(req.Body, &pkgidx)
+	req, err := sendRequest(http.MethodGet, "http://localhost:3000", jsonBody)
+	if err != nil {
+		fmt.Printf("Fetching error: %s\n", err)
+	}
+	err = json.Unmarshal(req.Body, &pkgidx)
 	if err != nil {
 		fmt.Println("Json Error: ", err)
 		return pkgidx, err

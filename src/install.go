@@ -45,6 +45,9 @@ func installPackage(packageName, packageVersion string) {
 	}
 	progress.change(9, "", "Extracting")
 	Unzip("temp.zip", "wyst_tmp")
+	if err := os.RemoveAll("lib/" + packageName); err != nil {
+		panic(err)
+	}
 	entries, err := os.ReadDir("./wyst_tmp")
 	if err != nil {
 		panic(err)

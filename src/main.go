@@ -33,6 +33,27 @@ func main() {
 			return
 		}
 		showPackageInfo(os.Args[2])
+	case "create":
+		if len(os.Args) < 3 {
+			fmt.Println("Usage: wpm create <package>")
+			return
+		}
+		createPackage(os.Args[2])
+
+	case "delete":
+		if len(os.Args) < 3 {
+			fmt.Println("Usage: wpm delete <package>")
+			return
+		}
+		deletePackage(os.Args[2])
+
+	case "edit":
+		if len(os.Args) < 3 {
+			fmt.Println("Usage: wpm edit <package>")
+			return
+		}
+		editPackage(os.Args[2])
+
 	default:
 		fmt.Println("Unknown command:", command)
 		showHelp()
