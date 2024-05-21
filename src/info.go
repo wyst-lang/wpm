@@ -27,10 +27,10 @@ func showPackageInfo(packageName string) {
 	}
 
 	fmt.Printf("Package: %s\n", packageName)
-	for version, info := range pkgIndex.Versions {
-		fmt.Printf("Version: %s\n", version)
-		fmt.Printf("  Author: %s\n", info.Author)
-		fmt.Printf("  Description: %s\n", info.Description)
-		fmt.Println()
-	}
+	// for version, info := range pkgIndex.Versions {
+	// 	fmt.Printf("Version: %s\n", version)
+	// 	fmt.Printf("  Author: %s\n", info.Author)
+	// 	fmt.Printf("  Description: %s\n", info.Description)
+	// 	fmt.Println()
+	// }
 }

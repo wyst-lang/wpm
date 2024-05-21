@@ -3,96 +3,62 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
+	"net/url"
 	"os"
-	"path/filepath"
+	"strings"
 )
 
-type PackageVersion struct {
+type Package struct {
 	Author      string `json:"author"`
 	Description string `json:"description"`
 	URL         string `json:"url"`
 }
 
 type PackageIndex struct {
-	Versions map[string]PackageVersion `json:"versions"`
+	Name string `json:"name"`
+	Repo string `json:"repo"`
 }
 
 func installPackage(packageName, packageVersion string) {
-	url := fmt.Sprintf("https://raw.githubusercontent.com/wyst-lang/index/master/%s/index.json", packageName)
-	resp, err := http.Get(url)
+	var pkgidx PackageIndex
+	jsonBody := []byte(fmt.Sprintf(`{"name": "%s"}`, packageName))
+	resBody := sendRequest(http.MethodGet, "http://localhost:3000", jsonBody)
+	err := json.Unmarshal(resBody.Body, &pkgidx)
 	if err != nil {
-		fmt.Printf("Error fetching package info: %v\n", err)
-		return
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		fmt.Printf("Error: %s\n", resp.Status)
+		fmt.Println("Json Error: ", err)
 		return
 	}
 
-	var pkgIndex PackageIndex
-	if err := json.NewDecoder(resp.Body).Decode(&pkgIndex); err != nil {
-		fmt.Printf("Error decoding package info: %v\n", err)
-		return
+	fmt.Printf("repo: %s\n", pkgidx.Repo)
+
+	repoU, err := url.Parse(pkgidx.Repo)
+	if err != nil {
+		panic(err)
 	}
 
 	if packageVersion == "" {
-		packageVersion = getLatestVersion(pkgIndex)
+		packageVersion = getLatestVersion(repoU.Path)
 	}
-
-	pkgVersion, exists := pkgIndex.Versions[packageVersion]
-	if !exists {
-		fmt.Printf("Version %s not found for package %s\n", packageVersion, packageName)
-		return
+	downloadPackage(repoU.Path, packageVersion)
+	Unzip("temp.zip", "wyst_tmp")
+	entries, err := os.ReadDir("./wyst_tmp")
+	if err != nil {
+		panic(err)
 	}
-
-	downloadAndSavePackage(pkgVersion.URL, packageName, packageVersion)
-}
-
-func getLatestVersion(pkgIndex PackageIndex) string {
-	var latest string
-	for version := range pkgIndex.Versions {
-		if version > latest {
-			latest = version
+	if err := os.Mkdir("lib", os.ModePerm); err != nil {
+		ERR := fmt.Sprintf("%s", err)
+		if !strings.Contains(strings.ToLower(ERR), "file exists") {
+			panic(ERR)
 		}
 	}
-	return latest
-}
-
-func downloadAndSavePackage(url, packageName, packageVersion string) {
-	resp, err := http.Get(url)
-	if err != nil {
-		fmt.Printf("Error downloading package: %v\n", err)
-		return
+	for _, e := range entries {
+		os.Rename("wyst_tmp/"+e.Name(), "lib/"+packageName)
 	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		fmt.Printf("Error: %s\n", resp.Status)
-		return
+	if err := os.RemoveAll("wyst_tmp"); err != nil {
+		panic(err)
 	}
-
-	libDir := "lib"
-	if err := os.MkdirAll(libDir, 0755); err != nil {
-		fmt.Printf("Error creating lib directory: %v\n", err)
-		return
-	}
-
-	filename := filepath.Base(url)
-	packageFile := filepath.Join(libDir, filename)
-	out, err := os.Create(packageFile)
-	if err != nil {
-		fmt.Printf("Error creating package file: %v\n", err)
-		return
-	}
-	defer out.Close()
-
-	if _, err := io.Copy(out, resp.Body); err != nil {
-		fmt.Printf("Error saving package: %v\n", err)
-	} else {
-		fmt.Printf("Package %s version %s downloaded and saved successfully as %s\n", packageName, packageVersion, filename)
+	if err := os.Remove("temp.zip"); err != nil {
+		panic(err)
 	}
 }
