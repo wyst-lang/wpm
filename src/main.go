@@ -8,6 +8,7 @@ import (
 const wpmVersion = "1.0.0"
 
 func main() {
+	fmt.Println()
 	if len(os.Args) < 2 {
 		showHelp()
 		return

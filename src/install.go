@@ -20,7 +20,8 @@ type PackageVersion struct {
 }
 
 func installPackage(packageName, packageVersion string) {
-	fmt.Printf("Fetching %s\n", packageName)
+	progress := ProgressBar{total: 10, length: 20, enabled: false}
+	progress.change(1, "", "Fetching")
 	repoURL, err := getRepoURL(packageName)
 	if err != nil {
 		fmt.Printf("Error getting repo URL: %s\n", err)
@@ -31,10 +32,13 @@ func installPackage(packageName, packageVersion string) {
 		fmt.Printf("Error parsing repo URL: %s\n", err)
 	}
 	if packageVersion == "" {
-		packageVersion = getLatestVersion(repoU.Path)
-		fmt.Printf("Found version %s\n", packageVersion)
+		packageVersion, err = getLatestVersion(repoU.Path)
+		if err != nil {
+			fmt.Printf("Error extracting version: %s\n", err)
+		}
+		progress.change(3, "", fmt.Sprintf("Found version %s", packageVersion))
 	}
-	fmt.Printf("Downloading %s %s\n", packageName, packageVersion)
+	progress.change(6, "", "Downloading")
 	downloadPackage(repoU.Path, packageVersion)
 	if err := os.Mkdir("wyst_tmp", os.ModePerm); err != nil {
 		ERR := fmt.Sprintf("%s", err)
@@ -42,7 +46,7 @@ func installPackage(packageName, packageVersion string) {
 			panic(ERR)
 		}
 	}
-	fmt.Printf("Extracting %s %s\n", packageName, packageVersion)
+	progress.change(9, "", "Extracting")
 	Unzip("temp.zip", "wyst_tmp")
 	entries, err := os.ReadDir("./wyst_tmp")
 	if err != nil {
@@ -63,5 +67,7 @@ func installPackage(packageName, packageVersion string) {
 	if err := os.Remove("temp.zip"); err != nil {
 		panic(err)
 	}
-	fmt.Printf("%s %s Installed\n", packageName, packageVersion)
+	progress.change(10, "", "Installed")
+	progress.clean()
+	fmt.Printf("%s %s Installed\n\n", packageName, packageVersion)
 }

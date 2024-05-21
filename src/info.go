@@ -3,11 +3,14 @@ package main
 import "fmt"
 
 func showPackageInfo(packageName string) {
+	progress := ProgressBar{total: 4, length: 20}
+	progress.change(3, "", "Fetching")
 	repoURL, err := getRepoURL(packageName)
 	if err != nil {
-		fmt.Printf("Error getting repo URL: %v\n", err)
+		fmt.Printf("\nError getting repo URL: %v\n", err)
 		return
 	}
+	progress.clean()
 
 	// indexURL, err := findIndexURL(repoURL)
 	// if err != nil {
@@ -27,6 +30,6 @@ func showPackageInfo(packageName string) {
 	// fmt.Printf("Version: %s\n", version)
 	// fmt.Printf("  Author: %s\n", info.Author)
 	// fmt.Printf("  Description: %s\n", info.Description)
-	fmt.Println()
+	// fmt.Println()
 	// }
 }
