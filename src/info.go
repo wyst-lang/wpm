@@ -5,7 +5,7 @@ import "fmt"
 func showPackageInfo(packageName string) {
 	progress := ProgressBar{total: 4, length: 20}
 	progress.change(3, "", "Fetching")
-	repoURL, err := getRepoURL(packageName)
+	pkgidx, err := getPackage(packageName)
 	if err != nil {
 		fmt.Printf("\nError getting repo URL: %v\n", err)
 		return
@@ -25,7 +25,8 @@ func showPackageInfo(packageName string) {
 	// }
 
 	fmt.Printf("Package: %s\n", packageName)
-	fmt.Printf("Repo: %s\n", repoURL)
+	fmt.Printf("Repo: %s\n", pkgidx.Repo)
+	fmt.Printf("Version: %s\n", pkgidx.Latest)
 	// for version, info := range pkgIndex.Versions {
 	// fmt.Printf("Version: %s\n", version)
 	// fmt.Printf("  Author: %s\n", info.Author)

@@ -23,6 +23,7 @@ type Package struct {
 type PackageIndex struct {
 	Name    string `json:"name"`
 	Repo    string `json:"repo"`
+	Latest  string `json:"latest"`
 	Message string `json:"message"`
 }
 
@@ -48,17 +49,17 @@ func sendRequest(method, url string, jsonBody []byte) Request {
 	return Request{Body: resBody, StatusCode: res.StatusCode}
 }
 
-func getRepoURL(packageName string) (string, error) {
+func getPackage(packageName string) (PackageIndex, error) {
 	var pkgidx PackageIndex
 	jsonBody := []byte(fmt.Sprintf(`{"name": "%s"}`, packageName))
 	req := sendRequest(http.MethodGet, "http://localhost:3000", jsonBody)
 	err := json.Unmarshal(req.Body, &pkgidx)
 	if err != nil {
 		fmt.Println("Json Error: ", err)
-		return "", err
+		return pkgidx, err
 	}
 	if req.StatusCode != 200 {
-		return "", fmt.Errorf(pkgidx.Message)
+		return pkgidx, fmt.Errorf(pkgidx.Message)
 	}
-	return pkgidx.Repo, nil
+	return pkgidx, nil
 }

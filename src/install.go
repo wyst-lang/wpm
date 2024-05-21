@@ -22,21 +22,18 @@ type PackageVersion struct {
 func installPackage(packageName, packageVersion string) {
 	progress := ProgressBar{total: 10, length: 20, enabled: true}
 	progress.change(1, "", "Fetching")
-	repoURL, err := getRepoURL(packageName)
+	pkgidx, err := getPackage(packageName)
 	if err != nil {
 		fmt.Printf("Error getting repo URL: %s\n", err)
 		return
 	}
-	repoU, err := url.Parse(repoURL)
+	repoU, err := url.Parse(pkgidx.Repo)
 	if err != nil {
 		fmt.Printf("Error parsing repo URL: %s\n", err)
 	}
 	if packageVersion == "" {
-		packageVersion, err = getLatestVersion(repoU.Path)
-		if err != nil {
-			fmt.Printf("Error extracting version: %s\n", err)
-		}
-		progress.change(3, "", fmt.Sprintf("Found version %s", packageVersion))
+		packageVersion = pkgidx.Latest
+		progress.change(3, "", fmt.Sprintf("Using version %s", packageVersion))
 	}
 	progress.change(6, "", "Downloading")
 	downloadPackage(repoU.Path, packageVersion)

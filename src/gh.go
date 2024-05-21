@@ -2,7 +2,6 @@ package main
 
 import (
 	"archive/zip"
-	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -117,17 +116,6 @@ func Unzip(src, dest string) error {
 	}
 
 	return nil
-}
-
-func getLatestVersion(repoU string) (string, error) {
-	jsonBody := []byte("")
-	res := sendRequest(http.MethodGet, fmt.Sprintf("https://api.github.com/repos%s/releases/latest", repoU), jsonBody)
-	var release Release
-	err := json.Unmarshal([]byte(string(res.Body)), &release)
-	if err != nil || res.StatusCode != 200 {
-		return "", err
-	}
-	return release.TagName, nil
 }
 
 func downloadPackage(repoU, tag string) error {
