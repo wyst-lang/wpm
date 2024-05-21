@@ -20,7 +20,7 @@ type PackageVersion struct {
 }
 
 func installPackage(packageName, packageVersion string) {
-	progress := ProgressBar{total: 10, length: 20, enabled: false}
+	progress := ProgressBar{total: 10, length: 20, enabled: true}
 	progress.change(1, "", "Fetching")
 	repoURL, err := getRepoURL(packageName)
 	if err != nil {
