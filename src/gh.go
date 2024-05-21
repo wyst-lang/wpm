@@ -133,23 +133,23 @@ func getLatestVersion(repoU string) string {
 	return latest
 }
 
-func downloadPackage(repoU, tag string) {
+func downloadPackage(repoU, tag string) error {
 	resp, err := http.Get(fmt.Sprintf("https://github.com/%s/archive/refs/tags/%s.zip", strings.Trim(repoU, "/"), tag))
 	if err != nil {
-		fmt.Println("Error:", err)
-		return
+		return err
 	}
 	defer resp.Body.Close()
 
 	out, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Println("Error reading body:", err)
-		return
+		return err
 	}
 
 	err = ioutil.WriteFile("temp.zip", out, 0644)
 	if err != nil {
 		fmt.Println("Error writing file:", err)
-		return
+		return err
 	}
+	return nil
 }
