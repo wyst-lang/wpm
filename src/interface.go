@@ -57,18 +57,22 @@ func ReadPassword(buff *string) error {
 		}
 		chr := string(b[0])
 		if chr == "\r" || chr == "\n" {
+			fmt.Printf("\n\r")
 			return nil
 		} else if chr == "\b" || b[0] == 127 {
-			fmt.Print("\033[1D \033[1D")
-			tmp := string(*buff)
-			*buff = tmp[:len(tmp)-1]
-		}
-		if safeChar == "off" {
-			fmt.Print(chr)
+			if len(*buff) > 0 {
+				fmt.Print("\033[1D \033[1D")
+				*buff = string(*buff)[:len(*buff)-1]
+			}
 		} else {
-			fmt.Print(safeChar)
+			*buff += chr
+			if safeChar == "off" {
+				fmt.Print(chr)
+			} else {
+				fmt.Print(safeChar)
+			}
 		}
-		*buff += chr
+
 	}
 	return nil
 }
