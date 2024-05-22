@@ -30,10 +30,17 @@ func parsePackageArg(arg string) (string, string) {
 
 func createPackage(packageName string) {
 	var psw string
+	var pswV string
 	var repo string
 	var version string
 	fmt.Printf("Enter the password for %s: ", packageName)
-	fmt.Scanln(&psw)
+	ReadPassword(&psw)
+	fmt.Printf("Verify the password for %s: ", packageName)
+	ReadPassword(&pswV)
+	if psw != pswV {
+		fmt.Printf("Passwords do not match\n")
+		return
+	}
 	fmt.Printf("Enter the repo for %s: ", packageName)
 	fmt.Scanln(&repo)
 	fmt.Printf("Enter the latest version for %s: ", packageName)
@@ -56,7 +63,7 @@ func editPackage(packageName string) {
 	var newPackageName string = packageName
 
 	fmt.Printf("Enter the password for %s: ", packageName)
-	fmt.Scanln(&psw)
+	ReadPassword(&psw)
 	newPsw = psw
 
 	for true {
@@ -77,7 +84,7 @@ func editPackage(packageName string) {
 			fmt.Scanln(&newPackageName)
 		case "2":
 			fmt.Printf("Enter the new password for %s: ", packageName)
-			fmt.Scanln(&newPsw)
+			ReadPassword(&newPsw)
 		case "3":
 			fmt.Printf("Enter the repo for %s: ", packageName)
 			fmt.Scanln(&repo)
@@ -106,7 +113,7 @@ func editPackage(packageName string) {
 func deletePackage(packageName string) {
 	fmt.Printf("Enter the password for %s: ", packageName)
 	var psw string
-	fmt.Scanln(&psw)
+	ReadPassword(&psw)
 	jsonBody := []byte(fmt.Sprintf(`{"name": "%s", "psw": "%v"}`, packageName, psw))
 	sendRequest(http.MethodDelete, URL, jsonBody)
 }

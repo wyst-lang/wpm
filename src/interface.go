@@ -2,7 +2,10 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"strings"
+
+	"golang.org/x/term"
 )
 
 type ProgressBar struct {
@@ -37,4 +40,35 @@ func (prb ProgressBar) clean() {
 	if prb.enabled {
 		fmt.Printf("\r" + strings.Repeat(" ", prb.last_suffix+prb.length+2) + "\r")
 	}
+}
+
+func ReadPassword(buff *string) error {
+	safeChar := "*"
+	oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
+	if err != nil {
+		return err
+	}
+	defer term.Restore(int(os.Stdin.Fd()), oldState)
+	for true {
+		b := make([]byte, 1)
+		_, err = os.Stdin.Read(b)
+		if err != nil {
+			return err
+		}
+		chr := string(b[0])
+		if chr == "\r" || chr == "\n" {
+			return nil
+		} else if chr == "\b" || b[0] == 127 {
+			fmt.Print("\033[1D \033[1D")
+			tmp := string(*buff)
+			*buff = tmp[:len(tmp)-1]
+		}
+		if safeChar == "off" {
+			fmt.Print(chr)
+		} else {
+			fmt.Print(safeChar)
+		}
+		*buff += chr
+	}
+	return nil
 }
