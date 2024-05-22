@@ -48,13 +48,15 @@ func createPackage(packageName string) {
 	jsonBody := []byte(fmt.Sprintf(`{"name": "%v", "psw": "%v", "repo": "%v", "latest": "%v"}`, packageName, psw, repo, version))
 	_, err := sendRequest(http.MethodPost, URL, jsonBody)
 	if err != nil {
-
+		fmt.Println(err)
 	}
 }
 
 func editPackage(packageName string) {
 	pkgidx, err := getPackage(packageName)
 	if err != nil {
+		fmt.Println(err)
+		return
 	}
 	var psw string
 	var repo string = pkgidx.Repo
@@ -67,7 +69,7 @@ func editPackage(packageName string) {
 	newPsw = psw
 
 	for true {
-		fmt.Printf("\033[2J")
+		clear()
 		fmt.Println("Choose what you want to modify")
 		fmt.Printf("  1 -> package name:   %s\n", newPackageName)
 		fmt.Printf("  2 -> password:       %s\n", newPsw)
