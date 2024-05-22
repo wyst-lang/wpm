@@ -26,6 +26,10 @@ type PackageIndex struct {
 	Message string `json:"message"`
 }
 
+type Message struct {
+	Message string `json:"message"`
+}
+
 func sendRequest(method, url string, jsonBody []byte) (Request, error) {
 	bodyReader := bytes.NewReader(jsonBody)
 	req, err := http.NewRequest(method, url, bodyReader)
@@ -61,4 +65,16 @@ func getPackage(packageName string) (PackageIndex, error) {
 		return pkgidx, fmt.Errorf(pkgidx.Message)
 	}
 	return pkgidx, nil
+}
+
+func getMessage(req Request) error {
+	var msg Message
+	err := json.Unmarshal(req.Body, &msg)
+	if err != nil {
+		return fmt.Errorf("JsonError: %v", err)
+	}
+	if msg.Message != "ok" {
+		return fmt.Errorf(msg.Message)
+	}
+	return nil
 }

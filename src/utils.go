@@ -66,6 +66,8 @@ func ReadPassword(buff *string) error {
 				fmt.Print("\033[1D \033[1D")
 				*buff = string(*buff)[:len(*buff)-1]
 			}
+		} else if b[0] == 3 {
+			os.Exit(0)
 		} else {
 			*buff += chr
 			if safeChar == "off" {

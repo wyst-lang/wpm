@@ -38,17 +38,26 @@ func createPackage(packageName string) {
 	fmt.Printf("Verify the password for %s: ", packageName)
 	ReadPassword(&pswV)
 	if psw != pswV {
-		fmt.Printf("Passwords do not match\n")
+		fmt.Printf("Passwords do not match\n\r")
 		return
 	}
 	fmt.Printf("Enter the repo for %s: ", packageName)
 	fmt.Scanln(&repo)
 	fmt.Printf("Enter the latest version for %s: ", packageName)
 	fmt.Scanln(&version)
+	fmt.Println()
 	jsonBody := []byte(fmt.Sprintf(`{"name": "%v", "psw": "%v", "repo": "%v", "latest": "%v"}`, packageName, psw, repo, version))
-	_, err := sendRequest(http.MethodPost, URL, jsonBody)
+	req, err := sendRequest(http.MethodPost, URL, jsonBody)
 	if err != nil {
 		fmt.Println(err)
+		return
+	}
+	err = getMessage(req)
+	if err != nil {
+		fmt.Printf("Error: %v\n\r", err)
+		return
+	} else {
+		fmt.Printf("Done\n\r")
 	}
 }
 
@@ -64,19 +73,19 @@ func editPackage(packageName string) {
 	var newPsw string
 	var newPackageName string = packageName
 
-	fmt.Printf("Enter the password for %s: ", packageName)
+	fmt.Printf("\rEnter the password for %s: ", packageName)
 	ReadPassword(&psw)
 	newPsw = psw
 
 	for true {
 		clear()
-		fmt.Println("Choose what you want to modify")
-		fmt.Printf("  1 -> package name:   %s\n", newPackageName)
-		fmt.Printf("  2 -> password:       %s\n", newPsw)
-		fmt.Printf("  3 -> repo:           %s\n", repo)
-		fmt.Printf("  4 -> latest version: %s\n", version)
-		fmt.Println("Type in 'quit'/'q'/'exit' to discard your changes")
-		fmt.Println("Type in anything else to confirm your changes")
+		fmt.Printf("Choose what you want to modify\n\r")
+		fmt.Printf("  1 -> package name  : %s\n\r", newPackageName)
+		fmt.Printf("  2 -> password      : %s\n\r", newPsw)
+		fmt.Printf("  3 -> repo          : %s\n\r", repo)
+		fmt.Printf("  4 -> latest version: %s\n\r", version)
+		fmt.Printf("Type in 'quit'/'q'/'exit' to discard your changes\n\r")
+		fmt.Printf("Type in anything else to confirm your changes\n\r")
 		var option string
 		fmt.Print("\n> ")
 		fmt.Scanln(&option)
@@ -104,8 +113,15 @@ func editPackage(packageName string) {
 			req, err := sendRequest(http.MethodPut, URL, jsonBody)
 			if err != nil {
 				fmt.Printf("Error while editing %s: %v", packageName, err)
+				return
 			}
-			fmt.Printf(string(req.Body))
+			err = getMessage(req)
+			if err != nil {
+				fmt.Printf("Error: %v\n\r", err)
+				return
+			} else {
+				fmt.Printf("Done\n\r")
+			}
 			return
 		}
 
@@ -117,5 +133,16 @@ func deletePackage(packageName string) {
 	var psw string
 	ReadPassword(&psw)
 	jsonBody := []byte(fmt.Sprintf(`{"name": "%s", "psw": "%v"}`, packageName, psw))
-	sendRequest(http.MethodDelete, URL, jsonBody)
+	req, err := sendRequest(http.MethodDelete, URL, jsonBody)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	err = getMessage(req)
+	if err != nil {
+		fmt.Printf("Error: %v\n\r", err)
+		return
+	} else {
+		fmt.Printf("Done\n\r")
+	}
 }
