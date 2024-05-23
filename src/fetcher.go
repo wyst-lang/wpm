@@ -52,7 +52,7 @@ func sendRequest(method, url string, jsonBody []byte) (Request, error) {
 func getPackage(packageName string) (PackageIndex, error) {
 	var pkgidx PackageIndex
 	jsonBody := []byte(fmt.Sprintf(`{"name": "%s"}`, packageName))
-	req, err := sendRequest(http.MethodGet, "http://localhost:3000", jsonBody)
+	req, err := sendRequest(http.MethodGet, URL, jsonBody)
 	if err != nil {
 		fmt.Printf("Fetching error: %s\n", err)
 	}

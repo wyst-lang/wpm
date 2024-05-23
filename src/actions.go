@@ -6,7 +6,8 @@ import (
 	"strings"
 )
 
-const URL = "http://localhost:3000"
+// const URL = "http://localhost:3000"
+const URL = "https://pms-xdib.onrender.com"
 
 func showHelp() {
 	fmt.Println("wpm - Wyst Package Manager")
