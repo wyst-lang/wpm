@@ -1,4 +1,4 @@
-module github.com/RudideC/wyst-package-manager
+module github.com/wyst-lang/wpm
 
 go 1.22.0
 

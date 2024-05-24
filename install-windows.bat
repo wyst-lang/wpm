@@ -7,8 +7,8 @@ if %errorlevel% neq 0 (
     exit /b 1
 ) else (
     @echo off
-    xcopy /s /e /i /h /y . "%USERPROFILE%\wyst-package-manager"
-    cd /d "%USERPROFILE%\wyst-package-manager\src"
+    xcopy /s /e /i /h /y . "%USERPROFILE%\wpm"
+    cd /d "%USERPROFILE%\wpm\src"
     go build -o ..\wpm.exe
     copy ..\wpm.exe C:\Windows\System32
 )

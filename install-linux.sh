@@ -1,7 +1,7 @@
-cp -r . ~/wyst-package-manager
+cp -rf . ~/wpm
 
-cd ~/wyst-package-manager
+cd ~/wpm
 
-go build -o bin/ src/*.go
+go build -o bin/wpm src/*.go
 
 sudo cp bin/wpm /usr/bin/
